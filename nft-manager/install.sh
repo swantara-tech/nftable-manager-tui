@@ -206,6 +206,7 @@ copy_files() {
 create_symlink() {
     print_info "Membuat symbolic link..."
     
+    # Symlink untuk nft-manager
     local symlink_path="/usr/local/bin/nft-manager"
     
     # Hapus symlink lama jika ada
@@ -218,6 +219,19 @@ create_symlink() {
     chmod +x "$symlink_path"
     
     print_step "Symlink dibuat: ${symlink_path} -> ${INSTALL_DIR}/nft-manager.sh"
+    
+    # Symlink untuk nft-update
+    local update_symlink="/usr/local/bin/nft-update"
+    
+    if [[ -L "$update_symlink" ]]; then
+        rm -f "$update_symlink"
+    fi
+    
+    if [[ -f "${INSTALL_DIR}/update.sh" ]]; then
+        ln -sf "${INSTALL_DIR}/update.sh" "$update_symlink"
+        chmod +x "$update_symlink"
+        print_step "Symlink dibuat: ${update_symlink} -> ${INSTALL_DIR}/update.sh"
+    fi
 }
 
 set_permissions() {
@@ -364,9 +378,13 @@ show_post_install_info() {
     echo "  1. Jalankan sebagai root:"
     echo "     sudo nft-manager"
     echo ""
-    echo "  2. Atau dari direktori:"
+    echo "  2. Update ke versi terbaru:"
+    echo "     sudo nft-update"
+    echo ""
+    echo "  3. Atau dari direktori:"
     echo "     cd ${INSTALL_DIR}"
     echo "     sudo ./nft-manager.sh"
+    echo "     sudo ./update.sh"
     echo ""
     echo -e "${BLUE}Uninstall:${NC}"
     echo "  sudo ./uninstall.sh"

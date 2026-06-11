@@ -1,0 +1,23 @@
+# Qoder IDE
+.qoder/
+
+# OS Files
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# Editor Files
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# Logs
+*.log
+!logs/.gitkeep
+
+# Temporary Files
+*.tmp
+*.temp
+/tmp/

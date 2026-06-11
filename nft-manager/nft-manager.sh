@@ -13,12 +13,27 @@ set -euo pipefail
 # -----------------------------------------------------------------------------
 # Resolve symlink to get actual script location
 SCRIPT_SOURCE="${BASH_SOURCE[0]}"
+
+# Follow symlink chain
 while [ -L "$SCRIPT_SOURCE" ]; do
-    SCRIPT_DIR="$(cd -P "$(dirname "$SCRIPT_SOURCE")" >/dev/null 2>&1 || exit 1 && pwd)"
-    SCRIPT_SOURCE="$(readlink "$SCRIPT_SOURCE")"
-    [[ $SCRIPT_SOURCE != /* ]] && SCRIPT_SOURCE="$SCRIPT_DIR/$SCRIPT_SOURCE"
+    LINK=$(readlink "$SCRIPT_SOURCE")
+    if [[ "$LINK" == /* ]]; then
+        SCRIPT_SOURCE="$LINK"
+    else
+        SCRIPT_DIR="$(cd -P "$(dirname "$SCRIPT_SOURCE")" >/dev/null 2>&1 || exit 1 && pwd)"
+        SCRIPT_SOURCE="$SCRIPT_DIR/$LINK"
+    fi
 done
+
+# Get final directory
 SCRIPT_DIR="$(cd -P "$(dirname "$SCRIPT_SOURCE")" >/dev/null 2>&1 || exit 1 && pwd)"
+
+# Fallback: If running from /usr/local/bin, use /opt/nft-manager
+if [[ "$SCRIPT_DIR" == "/usr/local/bin" ]] || [[ ! -d "${SCRIPT_DIR}/config" ]]; then
+    if [[ -d "/opt/nft-manager" ]]; then
+        SCRIPT_DIR="/opt/nft-manager"
+    fi
+fi
 
 # -----------------------------------------------------------------------------
 # Load Konfigurasi

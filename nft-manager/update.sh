@@ -118,12 +118,46 @@ check_git() {
 backup_current_version() {
     print_info "Membuat backup versi saat ini..."
     
-    local backup_dir="${INSTALL_DIR}/backups/update-backup-$(date '+%Y%m%d-%H%M%S')"
+    local backup_dir="/opt/nft-backups/update-backup-$(date '+%Y%m%d-%H%M%S')"
     
     mkdir -p "$backup_dir"
     
-    # Backup seluruh direktori instalasi
-    if cp -r "${INSTALL_DIR}" "$backup_dir/current-installation" 2>&1; then
+    # Backup files penting (exclude backups dan logs)
+    print_info "Backing up files..."
+    
+    # Buat struktur direktori
+    mkdir -p "$backup_dir/current-installation/modules"
+    mkdir -p "$backup_dir/current-installation/config"
+    
+    # Copy main scripts
+    if [[ -f "${INSTALL_DIR}/nft-manager.sh" ]]; then
+        cp "${INSTALL_DIR}/nft-manager.sh" "$backup_dir/current-installation/"
+    fi
+    
+    if [[ -f "${INSTALL_DIR}/install.sh" ]]; then
+        cp "${INSTALL_DIR}/install.sh" "$backup_dir/current-installation/"
+    fi
+    
+    if [[ -f "${INSTALL_DIR}/uninstall.sh" ]]; then
+        cp "${INSTALL_DIR}/uninstall.sh" "$backup_dir/current-installation/"
+    fi
+    
+    if [[ -f "${INSTALL_DIR}/update.sh" ]]; then
+        cp "${INSTALL_DIR}/update.sh" "$backup_dir/current-installation/"
+    fi
+    
+    # Copy modules
+    if [[ -d "${INSTALL_DIR}/modules" ]]; then
+        cp -r "${INSTALL_DIR}/modules/"* "$backup_dir/current-installation/modules/" 2>/dev/null || true
+    fi
+    
+    # Copy config
+    if [[ -d "${INSTALL_DIR}/config" ]]; then
+        cp -r "${INSTALL_DIR}/config/"* "$backup_dir/current-installation/config/" 2>/dev/null || true
+    fi
+    
+    # Verify backup
+    if [[ -f "$backup_dir/current-installation/nft-manager.sh" ]]; then
         print_step "Backup dibuat: ${backup_dir}"
         BACKUP_PATH="$backup_dir"
     else
